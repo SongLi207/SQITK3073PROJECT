@@ -1,38 +1,27 @@
-# SQITK3073PROJECT
+# Malaysia Stock Forecast Dashboard
 
-SQIT 3073: Business Analytic Programming Group Project -  30% Marks
+## 📌 Overview
 
+This Streamlit-powered dashboard allows users to compare and forecast the performance of up to 5 selected Malaysian stocks. The application retrieves 3-month historical stock data via the Yahoo Finance API and provides optional 30-day price predictions using the Random Forest machine learning model.
 
-Tasks:
+Developed as part of a project for data analytics learning, this tool aims to make stock trend analysis intuitive and accessible.
 
-1. You are required to form a group 
-2. Each group must develop
+---
 
-An analytic web dashboard/model which includes (1) data retrieval and (2) development of quantitative modelling. Example of analytic system includes;
+## 🔍 Features
 
-- Prediction of stock market based on yahoo finance (use of API) using machine learning
-- House selection / Car selection using preferences
-- Etc.
+- 📈 **Historical Trends**: View closing prices of selected stocks for the past 3 months.
+- 🔮 **Forecasting**: Optional future 30-day predictions using `RandomForestRegressor`.
+- 🎨 **Responsive Layout**: Dynamic layout with consistent visual proportions (3 charts in row 1, 2 charts in row 2).
+- 🧠 **ML-based Forecasting**: Feature engineering with moving averages and lagged values.
+- 🌐 **Interactive Web Interface**: Built with Streamlit for easy use via browser.
 
-Dataset:
+---
 
-If you’re dealing with a Machine Learning type of project, you can use the API or Beautifulsoup / Scrapy library. You can also retrieve other dataset such as:
-https://open.dosm.gov.my/ 
-https://apikijangportal.bnm.gov.my/
-https://data.gov.my/
-https://github.com/public-apis/public-apis
-other open dataset platform
+## ⚙️ Installation & Setup
 
-Bonus marks will be given to projects that utilise web scraping/API, the use of SQL and visualisation. Hence the use of libraries such as Pandas, Matplotlib, Scikit Learn, Numpy and other libraries are an added advantage. Extra points would also be given to projects that possess either commercial value or impact to the community to use. 
+### 1. Clone or Download the Repository
 
-Deliverables:
-
-- Brief Technical Report (Introduction, Problem, Solution, Methodology/Workflow, Result, Conclusion)
-- Presentation Slide
-- Python Source Code in Github
-
-Submission Date 	: Week 14
-Presentation Date 	: Week 14
-
-Assessment will be conducted on the group based on report writing, programming work and presentation.
-
+```bash
+git clone https://github.com/your-username/stock-forecast-dashboard.git
+cd stock-forecast-dashboard

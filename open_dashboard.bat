@@ -1,4 +1,4 @@
 echo Launching Streamlit dashboard...
-streamlit run stock_forecast_dashboard.py
+streamlit run stock_dashboard.py
 
 pause

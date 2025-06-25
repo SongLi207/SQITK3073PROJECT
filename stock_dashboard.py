@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 from datetime import datetime, timedelta
 import io
 
@@ -16,10 +17,14 @@ st.set_page_config(layout="wide")
 st.title("📈 Malaysia Stock Forecast & Comparison Dashboard")
 
 st.markdown("""
-This dashboard allows users to select up to 5 Malaysian stocks to view their historical trends from the past 6 months and forecast the next 1 month using a machine learning model (Random Forest).
+This dashboard allows users to select up to 5 Malaysian stocks to view their historical trends 
+from the past 6 months and forecast the next 1 month using a machine learning model (Random Forest).
 
 It is designed specifically for **short-term investors** to observe market momentum and make data-driven decisions.
 """)
+
+# 新增一次性误差说明
+st.markdown("<sub>📌 MAE measures average prediction error, while RMSE penalizes larger errors more. Lower values indicate better performance.</sub>", unsafe_allow_html=True)
 
 # 股票列表
 stock_dict = {
@@ -42,7 +47,7 @@ future_days = 30
 
 # 页面模式选择
 mode = st.sidebar.selectbox(
-    "Select Page Mode",
+    "Select Display Mode",
     ["Stock Forecast", "Comparison Graph"]
 )
 
@@ -106,6 +111,12 @@ elif mode == "Stock Forecast":
             ["Only Historical", "Historical + Prediction"]
         )
 
+        feature_option = st.radio(
+            "Feature Set:",
+            ["Lag1 Only", "MA7 + MA14 + Lag1"],
+            index=1
+        )
+
     train_start_date = end_date - timedelta(days=train_months * 30)
 
     if len(selected_stocks) == 0:
@@ -130,13 +141,18 @@ elif mode == "Stock Forecast":
         ax.plot(plot_df['Close'], label='Historical Close', color='blue')
 
         if view_option == "Historical + Prediction":
-            df['MA7'] = df['Close'].rolling(window=7).mean()
-            df['MA14'] = df['Close'].rolling(window=14).mean()
             df['Lag1'] = df['Close'].shift(1)
-            df.dropna(inplace=True)
+            if feature_option == "MA7 + MA14 + Lag1":
+                df['MA7'] = df['Close'].rolling(window=7).mean()
+                df['MA14'] = df['Close'].rolling(window=14).mean()
+                X = df[['MA7', 'MA14', 'Lag1']]
+            else:
+                X = df[['Lag1']]
 
-            X = df[['MA7', 'MA14', 'Lag1']]
+            df.dropna(inplace=True)
             y = df['Close']
+            X = X.loc[df.index]
+
             X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False, test_size=0.2)
 
             model = RandomForestRegressor(n_estimators=100, random_state=42)
@@ -148,12 +164,18 @@ elif mode == "Stock Forecast":
             for _ in range(future_days):
                 pred = model.predict(current)[0]
                 preds.append(pred)
-                next_row = [pred, (pred + current[0][1]) / 2, current[0][0]]
+                if feature_option == "MA7 + MA14 + Lag1":
+                    next_row = [pred, (pred + current[0][1]) / 2, current[0][0]]
+                else:
+                    next_row = [pred]
                 current = [next_row]
 
             future_dates = pd.date_range(df.index[-1] + pd.Timedelta(days=1), periods=future_days)
             pred_df = pd.DataFrame({'Date': future_dates, 'Predicted_Price': preds}).set_index('Date')
             ax.plot(pred_df.index, pred_df['Predicted_Price'], label='Predicted Close', color='green')
+
+            mae = mean_absolute_error(y_test, model.predict(X_test))
+            rmse = mean_squared_error(y_test, model.predict(X_test)) ** 0.5
 
         ax.set_title(name)
         ax.set_xlabel("Date")
@@ -168,6 +190,10 @@ elif mode == "Stock Forecast":
 
         closing_price = float(df['Close'].iloc[-1])
         st.caption(f"Closing Price: RM {closing_price:.2f}")
+
+        if view_option == "Historical + Prediction":
+            st.caption(f"📉 MAE (Mean Absolute Error): {mae:.4f}")
+            st.caption(f"📈 RMSE (Root Mean Squared Error): {rmse:.4f}")
 
     row1 = st.columns(len(row1_stocks))
     for idx, name in enumerate(row1_stocks):
